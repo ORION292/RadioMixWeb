@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RadioMix — Broadcast Web</title>
+  <meta name="description" content="RadioMix Web — Player e console de rádio com visual RadioBOSS" />
+  <meta name="theme-color" content="#0C0E12" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF8C00'/%3E%3Cpath d='M9 22V8l12-2v12' stroke='%23111' stroke-width='2.2' fill='none'/%3E%3Ccircle cx='7.5' cy='22' r='3' fill='%23111'/%3E%3Ccircle cx='19.5' cy='20' r='3' fill='%23111'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18V5l12-2v13"/>
+            <circle cx="6" cy="18" r="3"/>
+            <circle cx="18" cy="16" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <h1>RadioMix</h1>
+          <span class="version">WEB · v2.0</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <span id="onair-badge" class="badge offline">OFFLINE</span>
+        <span id="clock" class="clock">--:--:--</span>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="player">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        PLAYER
+      </button>
+      <button class="tab" data-tab="dsp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm4-8h2V10h-2v8z"/></svg>
+        DSP
+      </button>
+      <button class="tab" data-tab="stream">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+        STREAM
+      </button>
+      <button class="tab" data-tab="mta">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>
+        MTA
+      </button>
+      <button class="tab" data-tab="about">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        INFO
+      </button>
+    </nav>
+
+    <!-- Main content -->
+    <main class="content">
+
+      <!-- ══════ PLAYER ══════ -->
+      <section id="tab-player" class="tab-panel active">
+        <div class="now-playing">
+          <div class="cover">
+            <div class="cover-art" id="cover-art">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            </div>
+            <div class="vu-meters">
+              <div class="vu-bar"><div class="vu-fill" id="vu-l"></div></div>
+              <div class="vu-bar"><div class="vu-fill" id="vu-r"></div></div>
+            </div>
+          </div>
+          <div class="track-info">
+            <div class="track-title" id="track-title">Nenhuma faixa</div>
+            <div class="track-artist" id="track-artist">Selecione ou cole uma URL de stream</div>
+            <div class="progress-wrap">
+              <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+              <div class="time-row">
+                <span id="time-current">0:00</span>
+                <span id="time-total">0:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="ctrl-btn" id="btn-prev" title="Anterior">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button class="ctrl-btn play-btn" id="btn-play" title="Play/Pause">
+            <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="ctrl-btn" id="btn-next" title="Próxima">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <div class="volume-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            <input type="range" id="volume" min="0" max="100" value="80" />
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span>STREAM / PLAYLIST</span>
+            <button class="btn-sm" id="btn-add-url">+ URL</button>
+          </div>
+          <div class="stream-url-box">
+            <input type="text" id="stream-url" placeholder="https://seu-servidor:8000/mount ou URL de áudio" />
+            <button class="btn-accent" id="btn-load-stream">CARREGAR</button>
+          </div>
+          <ul class="playlist" id="playlist">
+            <!-- items injected by JS -->
+          </ul>
+          <p class="hint">Cole a URL pública do mount Icecast/SHOUTcast gerado pelo app Android ou qualquer stream HTTP.</p>
+        </div>
+      </section>
+
+      <!-- ══════ DSP ══════ -->
+      <section id="tab-dsp" class="tab-panel">
+        <div class="panel">
+          <div class="panel-header">BROADCAST PROFILE</div>
+          <div class="profile-row">
+            <button class="profile-btn" data-profile="FM">FM</button>
+            <button class="profile-btn active" data-profile="MTA">MTA</button>
+            <button class="profile-btn" data-profile="WEB">WEB</button>
+          </div>
+          <p class="hint">Presets de processamento local (visual). O processamento real acontece no app Android.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">CADEIA DSP (referência)</div>
+          <div class="dsp-chain">
+            <div class="dsp-module on">
+              <span class="mod-name">BaxterEQ</span>
+              <span class="mod-desc">5-band parametric</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module on">
+              <span class="mod-name">BootEQ</span>
+              <span class="mod-desc">Shelves</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module on">
+              <span class="mod-name">AGC</span>
+              <span class="mod-desc">Target + max gain</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module on">
+              <span class="mod-name">Density</span>
+              <span class="mod-desc">Compressor</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module">
+              <span class="mod-name">Ferric</span>
+              <span class="mod-desc">Soft sat</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module">
+              <span class="mod-name">epicVerb</span>
+              <span class="mod-desc">Ambience</span>
+            </div>
+            <div class="dsp-arrow">→</div>
+            <div class="dsp-module on">
+              <span class="mod-name">Limiter</span>
+              <span class="mod-desc">Peak ceiling</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">EQ RÁPIDO (simulado)</div>
+          <div class="eq-sliders" id="eq-sliders">
+            <!-- generated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════ STREAM ══════ -->
+      <section id="tab-stream" class="tab-panel">
+        <div class="status-banner" id="stream-status">
+          <div class="status-dot offline"></div>
+          <div>
+            <div class="status-title">SOURCE OFFLINE</div>
+            <div class="status-sub">O encoder e o cliente SOURCE rodam no app Android</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">CONFIGURAÇÃO (referência do app)</div>
+          <div class="form-grid">
+            <label>Protocolo
+              <select id="proto">
+                <option>Icecast</option>
+                <option>SHOUTcast v1</option>
+                <option>SHOUTcast v2</option>
+              </select>
+            </label>
+            <label>Host
+              <input type="text" value="seu-servidor.com" readonly />
+            </label>
+            <label>Porta
+              <input type="text" value="8000" readonly />
+            </label>
+            <label>Mount
+              <input type="text" value="/live" readonly />
+            </label>
+            <label>Usuário
+              <input type="text" value="source" readonly />
+            </label>
+            <label>Bitrate AAC
+              <input type="text" value="128 kbps" readonly />
+            </label>
+          </div>
+          <p class="hint">As credenciais SOURCE ficam apenas no aparelho Android. Nunca exponha a senha em sites ou scripts MTA.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">FLUXO COMPLETO</div>
+          <pre class="code-block">Playlist + DSP (Android)
+        ↓
+   AAC-LC encoder (MediaCodec)
+        ↓
+SOURCE → Icecast / SHOUTcast
+        ↓
+   URL pública do mount
+        ↓
+Este site (player) + resource MTA</pre>
+        </div>
+      </section>
+
+      <!-- ══════ MTA ══════ -->
+      <section id="tab-mta" class="tab-panel">
+        <div class="panel">
+          <div class="panel-header">MTA:SA INTEGRATION</div>
+          <p class="desc">Use a URL pública do seu mount no resource do servidor MTA. O áudio chega nos jogadores via <code>playSound</code>.</p>
+          
+          <label class="full">URL do Stream
+            <input type="text" id="mta-url" placeholder="https://seu-servidor:8000/live" />
+          </label>
+          <label class="full">Nome da Estação
+            <input type="text" id="mta-name" value="RadioMix" />
+          </label>
+
+          <div class="panel-header" style="margin-top:16px">client.lua (exemplo)</div>
+          <pre class="code-block" id="mta-lua">local STREAM_URL = "https://seu-servidor:8000/live"
+local STATION = "RadioMix"
+
+addEventHandler("onClientResourceStart", resourceRoot, function()
+    local sound = playSound(STREAM_URL, true)
+    if sound then
+        setSoundVolume(sound, 0.7)
+        outputChatBox("#FF8C00[RadioMix]#FFFFFF " .. STATION .. " no ar!", 255, 255, 255, true)
+    end
+end)</pre>
+          <button class="btn-accent" id="btn-copy-lua">COPIAR SCRIPT</button>
+        </div>
+      </section>
+
+      <!-- ══════ ABOUT ══════ -->
+      <section id="tab-about" class="tab-panel">
+        <div class="panel">
+          <div class="panel-header">SOBRE O RADIOMIX</div>
+          <p class="desc">
+            <strong>RadioMix</strong> é um motor de broadcast nativo para Android (Kotlin + Jetpack Compose).
+            Ele faz playlist contínua, DSP em tempo real, encoding AAC-LC e envio SOURCE para Icecast / SHOUTcast.
+          </p>
+          <ul class="feature-list">
+            <li>Foreground Service + WakeLock (24h)</li>
+            <li>DSP: EQ paramétrico, shelves, AGC, compressor, saturação, reverb, limiter</li>
+            <li>Encoder AAC-LC (MediaCodec) + frames ADTS</li>
+            <li>Cliente SOURCE Icecast / SHOUTcast v1 / v2</li>
+            <li>Reconexão automática com backoff</li>
+            <li>Automação por horário (AlarmManager)</li>
+            <li>Resource de exemplo para Multi Theft Auto</li>
+          </ul>
+          <p class="desc" style="margin-top:12px">
+            Esta versão <strong>Web</strong> serve como player público e console de referência.
+            O processamento e a transmissão SOURCE continuam no aplicativo Android.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="panel-header">LIMITAÇÕES IMPORTANTES</div>
+          <ul class="feature-list muted">
+            <li>Não gera RF / não é transmissor FM</li>
+            <li>Limiter é de pico de amostra (não true-peak certificado)</li>
+            <li>DSP inspirado — não carrega DLLs de plugins Windows</li>
+            <li>Teste sempre reconexão, Wi-Fi/móvel e tela bloqueada</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      RadioMix Broadcast Engine · Web Player
+    </footer>
+  </div>
+
+  <audio id="audio" crossorigin="anonymous" preload="none"></audio>
+  <script src="app.js"></script>
+</body>
+</html>
