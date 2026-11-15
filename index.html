@@ -6,7 +6,7 @@
   <title>RadioMix — Broadcast Web</title>
   <meta name="theme-color" content="#0C0E12" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ORION292/RadioMixWeb@main/styles.css" />
 </head>
 <body>
   <div id="app">
@@ -49,13 +49,13 @@
         <div class="panel"><div class="panel-header"><span>EQ 31</span><div class="toggle" id="tog-geq31"></div></div><div class="eq31-wrap"><div class="eq31" id="eq31"></div></div></div>
         <div class="panel"><div class="panel-header"><span>EQ 10</span><div class="toggle" id="tog-geq10"></div></div><div class="eq31-wrap"><div class="eq31" id="eq10" style="min-width:280px"></div></div></div>
       </section>
-      <section id="tab-stream" class="tab-panel"><div class="panel"><div class="panel-header">FLUXO</div><pre class="code-block">Android SOURCE → Icecast → Web player + DSP</pre></div></section>
+      <section id="tab-stream" class="tab-panel"><div class="panel"><pre class="code-block">Android SOURCE → Icecast → Web + DSP</pre></div></section>
       <section id="tab-mta" class="tab-panel"><div class="panel"><label class="full">URL<input type="text" id="mta-url" placeholder="https://seu-servidor:8000/live" /></label><label class="full">Nome<input type="text" id="mta-name" value="RadioMix" /></label><pre class="code-block" id="mta-lua"></pre><button class="btn-accent" id="btn-copy-lua">COPIAR</button></div></section>
-      <section id="tab-about" class="tab-panel"><div class="panel"><p class="desc"><strong>RadioMix Web v2.1</strong> DSP + player</p></div></section>
+      <section id="tab-about" class="tab-panel"><div class="panel"><p class="desc"><strong>RadioMix Web v2.1</strong></p></div></section>
     </main>
     <footer class="footer">RadioMix Web + DSP</footer>
   </div>
   <audio id="audio" preload="none"></audio>
-  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ORION292/RadioMixWeb@main/app.js"></script>
 </body>
 </html>
