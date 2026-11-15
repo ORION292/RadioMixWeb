@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>RadioMix — Broadcast Web</title>
   <meta name="theme-color" content="#0C0E12" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FF8C00'/%3E%3Cpath d='M9 22V8l12-2v12' stroke='%23111' stroke-width='2.2' fill='none'/%3E%3Ccircle cx='7.5' cy='22' r='3' fill='%23111'/%3E%3Ccircle cx='19.5' cy='20' r='3' fill='%23111'/%3E%3C/svg%3E" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -13,61 +12,78 @@
   <div id="app">
     <header class="header">
       <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        </div>
+        <div class="logo-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
         <div><h1>RadioMix</h1><span class="version">WEB · v2.1 DSP</span></div>
       </div>
-      <div class="header-status">
-        <span id="onair-badge" class="badge offline">OFFLINE</span>
-        <span id="clock" class="clock">--:--:--</span>
-      </div>
+      <div class="header-status"><span id="onair-badge" class="badge offline">OFFLINE</span><span id="clock" class="clock">--:--:--</span></div>
     </header>
     <nav class="tabs">
-      <button class="tab active" data-tab="player"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>PLAYER</button>
-      <button class="tab" data-tab="dsp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18h2V6H7v12zm4 4h2V2h-2v20zm4-8h2V10h-2v8z"/></svg>DSP</button>
-      <button class="tab" data-tab="stream"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>STREAM</button>
-      <button class="tab" data-tab="mta"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 7.5V2H9v5.5l3 3 3-3zM7.5 9H2v6h5.5l3-3-3-3zM9 16.5V22h6v-5.5l-3-3-3 3zM16.5 9l-3 3 3 3H22V9h-5.5z"/></svg>MTA</button>
-      <button class="tab" data-tab="about"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>INFO</button>
+      <button class="tab active" data-tab="player">PLAYER</button>
+      <button class="tab" data-tab="dsp">DSP</button>
+      <button class="tab" data-tab="stream">STREAM</button>
+      <button class="tab" data-tab="mta">MTA</button>
+      <button class="tab" data-tab="about">INFO</button>
     </nav>
     <main class="content">
       <section id="tab-player" class="tab-panel active">
         <div class="now-playing">
-          <div class="cover">
-            <div class="cover-art" id="cover-art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div>
-            <div class="vu-meters"><div class="vu-bar"><div class="vu-fill" id="vu-l"></div></div><div class="vu-bar"><div class="vu-fill" id="vu-r"></div></div></div>
-          </div>
-          <div class="track-info">
-            <div class="track-title" id="track-title">Nenhuma faixa</div>
-            <div class="track-artist" id="track-artist">Cole a URL do stream e clique CARREGAR</div>
-            <div class="progress-wrap"><div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div><div class="time-row"><span id="time-current">0:00</span><span id="time-total">0:00</span></div></div>
-          </div>
+          <div class="cover"><div class="cover-art" id="cover-art"></div><div class="vu-meters"><div class="vu-bar"><div class="vu-fill" id="vu-l"></div></div><div class="vu-bar"><div class="vu-fill" id="vu-r"></div></div></div></div>
+          <div class="track-info"><div class="track-title" id="track-title">Nenhuma faixa</div><div class="track-artist" id="track-artist">Cole a URL ou use STREAM → Ouvir</div><div class="progress-wrap"><div class="progress-bar" id="progress-bar"><div class="progress-fill" id="progress-fill"></div></div><div class="time-row"><span id="time-current">0:00</span><span id="time-total">0:00</span></div></div></div>
         </div>
         <div class="controls">
-          <button class="ctrl-btn" id="btn-prev"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-          <button class="ctrl-btn play-btn" id="btn-play"><svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><svg id="icon-pause" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
-          <button class="ctrl-btn" id="btn-next"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-          <div class="volume-wrap"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg><input type="range" id="volume" min="0" max="100" value="80" /></div>
+          <button class="ctrl-btn" id="btn-prev">⏮</button>
+          <button class="ctrl-btn play-btn" id="btn-play"><span id="icon-play">▶</span><span id="icon-pause" class="hidden">⏸</span></button>
+          <button class="ctrl-btn" id="btn-next">⏭</button>
+          <div class="volume-wrap"><input type="range" id="volume" min="0" max="100" value="80" /></div>
         </div>
         <div class="panel">
           <div class="panel-header"><span>STREAM / PLAYLIST</span><button class="btn-sm" id="btn-add-url">+ URL</button></div>
-          <div class="stream-url-box"><input type="text" id="stream-url" placeholder="https://servidor:8000/live" /><button class="btn-accent" id="btn-load-stream">CARREGAR</button></div>
-          <button class="btn-sm" id="btn-test-stream" style="width:100%;margin-bottom:10px">▶ Testar stream público (FIP MP3)</button>
+          <div class="stream-url-box"><input type="text" id="stream-url" placeholder="https://servidor:porta/stream" /><button class="btn-accent" id="btn-load-stream">CARREGAR</button></div>
+          <button class="btn-sm" id="btn-test-stream" style="width:100%;margin-bottom:10px">▶ Testar FIP MP3</button>
           <ul class="playlist" id="playlist"></ul>
-          <p class="hint">Use HTTPS + MP3. DSP na aba DSP (Web Audio em tempo real).</p>
+          <p class="hint"><strong>Músicas para transmitir:</strong> no <strong>app Android</strong> (playlist). O site só escuta o mount.</p>
         </div>
       </section>
       <section id="tab-dsp" class="tab-panel">
-        <div class="panel"><div class="panel-header">BROADCAST PROFILE</div><div class="profile-row"><button class="profile-btn" data-profile="FM">FM</button><button class="profile-btn active" data-profile="MTA">MTA</button><button class="profile-btn" data-profile="WEB">WEB</button></div><p class="hint">Presets. Ajuste os plugins como no app Android.</p></div>
-        <div class="panel"><div class="panel-header">PLUGINS (cadeia em tempo real)</div><div id="plugins-root"></div></div>
-        <div class="panel"><div class="panel-header"><span>GRAPHIC EQ 31 BANDAS</span><div class="toggle" id="tog-geq31"></div></div><div class="eq31-wrap"><div class="eq31" id="eq31"></div></div><p class="hint">20 Hz → 20 kHz · 1/3 oitava</p></div>
-        <div class="panel"><div class="panel-header"><span>GRAPHIC EQ 10 BANDAS</span><div class="toggle" id="tog-geq10"></div></div><div class="eq31-wrap"><div class="eq31" id="eq10" style="min-width:280px"></div></div></div>
+        <div class="panel"><div class="panel-header">PROFILE</div><div class="profile-row"><button class="profile-btn" data-profile="FM">FM</button><button class="profile-btn active" data-profile="MTA">MTA</button><button class="profile-btn" data-profile="WEB">WEB</button></div></div>
+        <div class="panel"><div class="panel-header">PLUGINS</div><div id="plugins-root"></div></div>
+        <div class="panel"><div class="panel-header"><span>EQ 31</span><div class="toggle" id="tog-geq31"></div></div><div class="eq31-wrap"><div class="eq31" id="eq31"></div></div></div>
+        <div class="panel"><div class="panel-header"><span>EQ 10</span><div class="toggle" id="tog-geq10"></div></div><div class="eq31-wrap"><div class="eq31" id="eq10" style="min-width:280px"></div></div></div>
       </section>
-      <section id="tab-stream" class="tab-panel"><div class="status-banner"><div class="status-dot offline"></div><div><div class="status-title">SOURCE no Android</div><div class="status-sub">Site toca o mount e aplica DSP local</div></div></div><div class="panel"><div class="panel-header">FLUXO</div><pre class="code-block">Android SOURCE → Icecast → URL pública → Web player + DSP</pre></div></section>
-      <section id="tab-mta" class="tab-panel"><div class="panel"><div class="panel-header">MTA:SA</div><label class="full">URL Stream<input type="text" id="mta-url" placeholder="https://seu-servidor:8000/live" /></label><label class="full">Nome<input type="text" id="mta-name" value="RadioMix" /></label><div class="panel-header" style="margin-top:16px">client.lua</div><pre class="code-block" id="mta-lua"></pre><button class="btn-accent" id="btn-copy-lua">COPIAR SCRIPT</button></div></section>
-      <section id="tab-about" class="tab-panel"><div class="panel"><div class="panel-header">SOBRE</div><p class="desc"><strong>RadioMix Web v2.1</strong> — player + DSP Web Audio (BaxterEQ, BootEQ, AGC, Density, Ferric, epicVerb, Limiter, EQ 10/31).</p></div></section>
+      <section id="tab-stream" class="tab-panel">
+        <div class="status-banner"><div class="status-dot offline"></div><div><div class="status-title">SOURCE = app Android</div><div class="status-sub">Dados mylistenmyradio / SHOUTcast v2</div></div></div>
+        <div class="panel">
+          <div class="panel-header">SERVIDOR</div>
+          <div class="form-grid">
+            <label class="full">Protocolo<select id="cfg-proto"><option value="shoutcast2">SHOUTcast v2</option><option value="shoutcast1">SHOUTcast v1</option><option value="icecast">Icecast</option></select></label>
+            <label class="full">Endereço / Host<input type="text" id="cfg-host" placeholder="s1.mylistenmyradio.com" /></label>
+            <label>Porta SOURCE<input type="number" id="cfg-port" value="8000" /></label>
+            <label>Porta ouvir<input type="number" id="cfg-listen-port" placeholder="igual SOURCE" /></label>
+            <label>Mount / Nº stream<input type="text" id="cfg-mount" value="/stream" placeholder="/stream ou 1" /></label>
+            <label>Usuário SOURCE<input type="text" id="cfg-user" value="source" /></label>
+            <label class="full">Senha SOURCE<input type="password" id="cfg-pass" placeholder="senha do painel" autocomplete="off" /></label>
+            <label>Bitrate<input type="number" id="cfg-bitrate" value="128" /></label>
+            <label>Formato<select id="cfg-format"><option value="aac">AAC</option><option value="mp3">MP3</option></select></label>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn-accent" id="btn-save-cfg" type="button">SALVAR</button>
+            <button class="btn-sm" id="btn-listen-cfg" type="button">▶ OUVIR NO PLAYER</button>
+            <button class="btn-sm" id="btn-copy-cfg" type="button">COPIAR DADOS</button>
+          </div>
+          <p class="hint" style="margin-top:10px">Use os mesmos dados no <strong>app Android</strong>. Senha fica só no seu dispositivo (localStorage).</p>
+        </div>
+        <div class="panel"><div class="panel-header">URL PÚBLICA</div><input type="text" id="cfg-listen-url" readonly placeholder="Após salvar" /><p class="hint">Para ouvintes / MTA / player</p></div>
+        <div class="panel"><div class="panel-header">ONDE COLOCAR AS MÚSICAS</div><pre class="code-block">1. App Android → Playlist → adicionar MP3/AAC
+2. Aba Stream → Host / Porta / Senha / Mount
+3. Protocolo: SHOUTcast v2
+4. Ligar SOURCE (ON AIR)
+
+O site só ESCUTA a URL pública.</pre></div>
+      </section>
+      <section id="tab-mta" class="tab-panel"><div class="panel"><label class="full">URL<input type="text" id="mta-url" /></label><label class="full">Nome<input type="text" id="mta-name" value="RadioMix" /></label><pre class="code-block" id="mta-lua"></pre><button class="btn-accent" id="btn-copy-lua">COPIAR</button></div></section>
+      <section id="tab-about" class="tab-panel"><div class="panel"><p class="desc"><strong>RadioMix Web</strong> — player + DSP. SOURCE = Android → SHOUTcast.</p></div></section>
     </main>
-    <footer class="footer">RadioMix Broadcast Engine · Web + DSP</footer>
+    <footer class="footer">RadioMix Web + DSP</footer>
   </div>
   <audio id="audio" preload="none"></audio>
   <script src="app.js"></script>
