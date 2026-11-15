@@ -36,11 +36,14 @@
 
   const TEST_STREAM = "https://icecast.radiofrance.fr/fip-midfi.mp3";
 
-  let tracks = [{ title: "Exemplo — cole sua URL de stream", artist: "Icecast / SHOUTcast", url: "" }];
+  let tracks = [
+    { title: "Nenhuma URL ainda", artist: "Cole o mount ou use o botao de teste", url: "" },
+  ];
   let current = -1;
   let isPlaying = false;
   let vuTimer = null;
   let loadToken = 0;
+  let activeUrl = "";
 
   function updateClock() {
     clockEl.textContent = new Date().toLocaleTimeString("pt-BR", { hour12: false });
@@ -67,7 +70,9 @@
   ["60", "250", "1k", "4k", "12k"].forEach((label) => {
     const div = document.createElement("div");
     div.className = "eq-band";
-    div.innerHTML = `<input type="range" min="-12" max="12" value="0" step="0.5" /><span class="eq-label">${label}</span>`;
+    div.innerHTML =
+      '<input type="range" min="-12" max="12" value="0" step="0.5" />' +
+      '<span class="eq-label">' + label + "</span>";
     document.getElementById("eq-sliders").appendChild(div);
   });
 
@@ -82,8 +87,17 @@
     tracks.forEach((t, i) => {
       const li = document.createElement("li");
       if (i === current) li.classList.add("active");
-      li.innerHTML = `<span class="idx">${String(i + 1).padStart(2, "0")}</span><div class="meta"><div class="name">${escapeHtml(t.title)}</div><div class="sub">${escapeHtml(t.artist || "Stream")}</div></div>`;
-      li.addEventListener("click", () => playIndex(i));
+      li.innerHTML =
+        '<span class="idx">' + String(i + 1).padStart(2, "0") +
+        '</span><div class="meta"><div class="name">' + escapeHtml(t.title) +
+        '</div><div class="sub">' + escapeHtml(t.artist || "Stream") + "</div></div>";
+      li.addEventListener("click", () => {
+        if (!t.url) {
+          trackArtist.textContent = "Essa faixa nao tem URL. Use CARREGAR ou o teste FIP.";
+          return;
+        }
+        playIndex(i);
+      });
       playlistEl.appendChild(li);
     });
   }
@@ -96,6 +110,7 @@
     try {
       const u = new URL(url);
       if (u.protocol !== "http:" && u.protocol !== "https:") return "";
+      if (u.href === location.href) return "";
       return u.href;
     } catch (_) {
       return "";
@@ -107,14 +122,12 @@
     const msg = (err && err.message) || String(err || "");
     if (name === "NotAllowedError") return "Toque bloqueado — clique de novo no Play";
     if (name === "NotSupportedError" || /no supported source/i.test(msg)) {
-      if (url && url.startsWith("http://") && location.protocol === "https:") {
-        return "Stream HTTP bloqueado em página HTTPS — use URL https:// do mount";
+      if (url && url.indexOf("http://") === 0 && location.protocol === "https:") {
+        return "HTTP bloqueado em pagina HTTPS — use https:// no mount";
       }
-      if (!url) return "Nenhuma URL carregada — cole o mount e clique CARREGAR";
-      return "Fonte inválida. Use HTTPS + MP3. Clique em Testar com stream público para validar o player";
+      return "Stream invalido/offline. Se o teste FIP tocar, o problema e a URL do seu mount";
     }
-    if (/CORS|cross-origin/i.test(msg)) return "CORS bloqueou o stream";
-    return "Falha ao tocar — confira se o mount está no ar";
+    return "Falha ao tocar — confira se o mount esta no ar";
   }
 
   function formatTime(sec) {
@@ -134,6 +147,15 @@
     onairBadge.classList.toggle("offline", !playing);
   }
 
+  function clearMediaElement() {
+    try { audio.pause(); } catch (_) {}
+    try {
+      audio.removeAttribute("src");
+      audio.load();
+    } catch (_) {}
+    activeUrl = "";
+  }
+
   function stopPlayback() {
     try { audio.pause(); } catch (_) {}
     setPlayingUI(false);
@@ -144,9 +166,17 @@
     if (idx < 0 || idx >= tracks.length) return;
     const t = tracks[idx];
     const url = normalizeStreamUrl(t.url);
+
     if (!url) {
       trackTitle.textContent = t.title || "Sem faixa";
-      trackArtist.textContent = "Cole uma URL válida e clique em CARREGAR (ou use o botão de teste)";
+      trackArtist.textContent = "Cole a URL e clique CARREGAR, ou use Testar FIP";
+      stopPlayback();
+      return;
+    }
+
+    if (url.indexOf("http://") === 0 && location.protocol === "https:") {
+      trackTitle.textContent = t.title;
+      trackArtist.textContent = "Mount HTTP em pagina HTTPS — browser bloqueia. Use HTTPS no Icecast.";
       stopPlayback();
       return;
     }
@@ -157,24 +187,32 @@
     renderPlaylist();
 
     const token = ++loadToken;
-    try { audio.pause(); } catch (_) {}
-    audio.removeAttribute("src");
-    try { audio.load(); } catch (_) {}
+    clearMediaElement();
+
     audio.removeAttribute("crossorigin");
     try { audio.crossOrigin = null; } catch (_) {}
+
+    activeUrl = url;
     audio.preload = "auto";
     audio.src = url;
 
     const onCanPlay = () => {
-      if (token !== loadToken) return;
+      if (token !== loadToken || !activeUrl) return;
       cleanup();
-      audio.play().then(() => {
+      const p = audio.play();
+      if (!p || typeof p.then !== "function") {
+        setPlayingUI(true);
+        startVu();
+        trackArtist.textContent = t.artist || "Stream ao vivo";
+        return;
+      }
+      p.then(() => {
         if (token !== loadToken) return;
         setPlayingUI(true);
         startVu();
         trackArtist.textContent = t.artist || "Stream ao vivo";
       }).catch((err) => {
-        console.warn("Play error:", err);
+        if (token !== loadToken) return;
         trackArtist.textContent = friendlyError(err, url);
         setPlayingUI(false);
         stopVu();
@@ -188,8 +226,8 @@
       let hint = "Falha ao carregar o stream";
       if (mediaErr) {
         if (mediaErr.code === 4) hint = friendlyError({ name: "NotSupportedError", message: "no supported source" }, url);
-        else if (mediaErr.code === 2) hint = "Rede/servidor offline — confira host e porta";
-        else if (mediaErr.code === 3) hint = "Erro de decodificação — tente MP3";
+        else if (mediaErr.code === 2) hint = "Servidor offline — confira host/porta e se o SOURCE esta no ar";
+        else if (mediaErr.code === 3) hint = "Formato nao suportado — use MP3 no Icecast";
       }
       trackArtist.textContent = hint;
       setPlayingUI(false);
@@ -212,7 +250,7 @@
     }
 
     setTimeout(() => {
-      if (token !== loadToken) return;
+      if (token !== loadToken || !activeUrl) return;
       if (!audio.paused && !audio.error) return;
       if (audio.readyState >= 2) { onCanPlay(); return; }
       audio.play().then(() => {
@@ -221,34 +259,34 @@
         setPlayingUI(true);
         startVu();
         trackArtist.textContent = t.artist || "Stream ao vivo";
-      }).catch((err) => {
-        if (audio.error) return;
-        trackArtist.textContent = friendlyError(err, url);
-        setPlayingUI(false);
-        stopVu();
-      });
-    }, 2500);
+      }).catch(() => {});
+    }, 3000);
   }
 
   function togglePlay() {
-    const inputUrl = normalizeStreamUrl(streamUrlInput.value);
-    if (!audio.src || audio.src === location.href || /\/$/.test(audio.src)) {
+    if (!activeUrl) {
+      const inputUrl = normalizeStreamUrl(streamUrlInput.value);
       if (inputUrl) { addAndPlay(inputUrl); return; }
-      trackArtist.textContent = "Cole a URL do stream e clique em CARREGAR";
+      trackArtist.textContent = "Nada para tocar. Cole a URL e CARREGAR, ou clique em Testar FIP";
       return;
     }
     if (audio.paused) {
-      audio.play().then(() => { setPlayingUI(true); startVu(); }).catch((err) => {
-        trackArtist.textContent = friendlyError(err, audio.src);
+      audio.play().then(() => {
+        setPlayingUI(true);
+        startVu();
+      }).catch((err) => {
+        trackArtist.textContent = friendlyError(err, activeUrl);
         setPlayingUI(false);
       });
-    } else stopPlayback();
+    } else {
+      stopPlayback();
+    }
   }
 
   function addAndPlay(rawUrl) {
     const url = normalizeStreamUrl(rawUrl);
     if (!url) {
-      trackArtist.textContent = "URL inválida — use http:// ou https://";
+      trackArtist.textContent = "URL invalida — exemplo: https://servidor:8000/live";
       return;
     }
     let title = "Stream ao vivo";
@@ -256,7 +294,7 @@
       const u = new URL(url);
       title = u.hostname + (u.pathname && u.pathname !== "/" ? u.pathname : "");
     } catch (_) {}
-    const entry = { title, artist: "HTTP Stream", url };
+    const entry = { title: title, artist: "HTTP Stream", url: url };
     if (tracks.length === 1 && !tracks[0].url) {
       tracks[0] = entry;
       playIndex(0);
@@ -290,7 +328,7 @@
 
   streamUrlInput.addEventListener("keydown", (e) => { if (e.key === "Enter") btnLoadStream.click(); });
   btnAddUrl.addEventListener("click", () => {
-    const url = prompt("Cole a URL do stream (http/https):");
+    const url = prompt("Cole a URL do stream (https://...):");
     if (url && url.trim()) { streamUrlInput.value = url.trim(); addAndPlay(url.trim()); }
   });
 
@@ -343,7 +381,9 @@
   function updateMtaLua() {
     const url = (mtaUrl.value || "https://seu-servidor:8000/live").trim();
     const name = (mtaName.value || "RadioMix").trim();
-    mtaLua.textContent = `local STREAM_URL = "${url}"\nlocal STATION = "${name}"\n\naddEventHandler("onClientResourceStart", resourceRoot, function()\n    local sound = playSound(STREAM_URL, true)\n    if sound then\n        setSoundVolume(sound, 0.7)\n        outputChatBox("#FF8C00[RadioMix]#FFFFFF " .. STATION .. " no ar!", 255, 255, 255, true)\n    end\nend)`;
+    mtaLua.textContent =
+      'local STREAM_URL = "' + url + '"\nlocal STATION = "' + name +
+      '"\n\naddEventHandler("onClientResourceStart", resourceRoot, function()\n    local sound = playSound(STREAM_URL, true)\n    if sound then\n        setSoundVolume(sound, 0.7)\n        outputChatBox("#FF8C00[RadioMix]#FFFFFF " .. STATION .. " no ar!", 255, 255, 255, true)\n    end\nend)';
   }
   mtaUrl.addEventListener("input", updateMtaLua);
   mtaName.addEventListener("input", updateMtaLua);
@@ -352,7 +392,7 @@
       await navigator.clipboard.writeText(mtaLua.textContent);
       btnCopyLua.textContent = "COPIADO!";
       setTimeout(() => (btnCopyLua.textContent = "COPIAR SCRIPT"), 1500);
-    } catch {
+    } catch (_) {
       const ta = document.createElement("textarea");
       ta.value = mtaLua.textContent;
       document.body.appendChild(ta);
@@ -373,8 +413,4 @@
   streamUrlInput.addEventListener("change", () => {
     try { localStorage.setItem("radiomix_last_url", streamUrlInput.value.trim()); } catch (_) {}
   });
-
-  if (location.protocol === "file:") {
-    console.info("RadioMix: arquivo local. Se o stream falhar, abra via http://localhost ou GitHub Pages.");
-  }
 })();
